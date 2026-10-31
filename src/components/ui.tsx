@@ -91,12 +91,15 @@ export function EmptyState({
   onAction: () => void;
 }) {
   return (
-    <div className="card py-12 px-6 text-center shadow-soft">
-      <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-accent-soft text-accent border border-accent/20">
-        <Icon name="pencil" className="h-6 w-6" />
+    <div className="card py-16 px-8 text-center shadow-card border border-line max-w-2xl mx-auto my-6">
+      <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-3xl bg-accent-soft text-accent border border-accent/30 shadow-inner">
+        <Icon name="pencil" className="h-7 w-7" />
       </div>
-      <p className="text-lg sm:text-xl font-bold text-ink max-w-md mx-auto">{title}</p>
-      <button type="button" className="btn-primary mt-6 text-xs sm:text-sm px-6" onClick={onAction}>
+      <p className="text-xl sm:text-2xl font-bold text-ink max-w-md mx-auto leading-snug">{title}</p>
+      <p className="mt-2 text-xs sm:text-sm text-ink-soft max-w-sm mx-auto">
+        Configure your event in Plan setup to activate your intelligent celebration dashboard.
+      </p>
+      <button type="button" className="btn-primary mt-6 text-xs sm:text-sm px-7 py-3 shadow-md shadow-accent/25 hover:shadow-lg transition-all" onClick={onAction}>
         {action}
       </button>
     </div>

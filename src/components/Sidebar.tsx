@@ -66,7 +66,7 @@ export function Sidebar({
                   {BRAND.nameSuffix}
                 </span>
               </div>
-              <p className="hidden text-xs text-ink-soft md:block mt-0.5 truncate">{BRAND.subtitle}</p>
+              <p className="hidden text-[11px] text-ink-soft md:block mt-0.5 leading-snug">{BRAND.subtitle}</p>
             </div>
           </div>
         </div>
@@ -120,20 +120,37 @@ export function Sidebar({
                   aria-selected={active}
                   aria-controls={`panel-${t.id}`}
                   tabIndex={active ? 0 : -1}
-                  className={`flex min-h-11 flex-1 md:flex-initial items-center justify-center md:justify-start gap-2.5 rounded-xl px-3 py-2 text-xs md:text-sm font-semibold transition-all duration-200 cursor-pointer whitespace-nowrap ${
+                  className={`flex min-h-11 flex-1 md:flex-initial items-center justify-between md:justify-start gap-2.5 rounded-xl px-3.5 py-2.5 text-xs md:text-sm font-semibold transition-all duration-200 cursor-pointer whitespace-nowrap ${
                     active
-                      ? 'bg-accent text-on-accent shadow-sm'
-                      : 'text-ink-soft hover:bg-paper hover:text-ink'
+                      ? 'bg-gradient-to-r from-accent to-accent-dark text-on-accent shadow-sm shadow-accent/25 ring-1 ring-accent/30'
+                      : 'text-ink-soft hover:bg-paper/80 hover:text-ink'
                   }`}
                   onClick={() => onSelectTab(t.id)}
                   onKeyDown={onKeyDown}
                 >
-                  <Icon name={t.icon} className="h-4 w-4 shrink-0" />
-                  <span>{t.label}</span>
+                  <div className="flex items-center gap-2.5">
+                    <Icon name={t.icon} className="h-4 w-4 shrink-0" />
+                    <span>{t.label}</span>
+                  </div>
+                  {active && (
+                    <span className="hidden md:inline-block h-1.5 w-1.5 rounded-full bg-on-accent/90 shrink-0 ml-auto" />
+                  )}
                 </button>
               );
             })}
           </div>
+
+          {!plan && (
+            <div className="mx-1 mt-4 hidden md:block rounded-xl border border-line/70 bg-paper/60 p-3.5 shadow-sm">
+              <div className="flex items-center gap-2 text-xs font-semibold text-ink">
+                <span className="flex h-5 w-5 items-center justify-center rounded-full bg-accent/15 text-accent font-bold text-[10px]">✦</span>
+                <span>Quick Start</span>
+              </div>
+              <p className="mt-1.5 text-[11px] leading-relaxed text-ink-soft">
+                Begin with <strong>Plan setup</strong> to set budget and guests. Timeline and vendor tools sync automatically.
+              </p>
+            </div>
+          )}
         </div>
       </div>
 
@@ -141,10 +158,10 @@ export function Sidebar({
         <p className="hidden md:block text-[11px] font-bold uppercase tracking-wider text-ink-muted mb-1">
           Actions & Workspace
         </p>
-        <div className="flex items-center gap-1.5 md:grid md:grid-cols-2">
+        <div className={plan ? 'flex items-center gap-1.5 md:grid md:grid-cols-2' : 'flex items-center w-full'}>
           <button
             type="button"
-            className="btn-secondary px-2.5 py-2 text-xs flex items-center justify-center gap-2 flex-1 md:flex-none"
+            className={`btn-secondary px-2.5 py-2 text-xs flex items-center justify-center gap-2 ${plan ? 'flex-1 md:flex-none' : 'w-full'}`}
             onClick={toggle}
             aria-label={theme === 'dark' ? 'Switch to light theme' : 'Switch to dark theme'}
           >

@@ -8,7 +8,7 @@ export const BRAND = {
   fullName: 'CelebrateX Studio',
   edition: 'Luxe Pro',
   tagline: 'Intelligent Celebration & Event Operating System',
-  subtitle: 'One connected plan for budget, timeline and vendors.',
+  subtitle: 'One connected celebration plan.',
   company: 'CelebrateX Studio Systems Inc.',
   supportEmail: 'concierge@celebratex.studio',
   version: '2.5.0',
