@@ -40,3 +40,4 @@ export function BudgetCards({ status }: { status: ReturnType<typeof budgetStatus
     </dl>
   );
 }
+
