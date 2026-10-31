@@ -90,16 +90,21 @@ export function TimelineTab({
       <section className="card shadow-soft" aria-labelledby="tl-h">
         <div className="flex flex-wrap items-start justify-between gap-4 border-b border-line pb-4">
           <div>
-            <h2 id="tl-h" className="text-xl font-bold">Your timeline</h2>
+            <h2 id="tl-h" className="text-xl font-bold">
+              Your timeline
+            </h2>
             <p className="mt-1 text-xs sm:text-sm text-ink-soft">
-              Event on <strong className="text-ink font-semibold">{formatDate(plan.eventDate)}</strong>
+              Event on{' '}
+              <strong className="text-ink font-semibold">{formatDate(plan.eventDate)}</strong>
               {daysToEvent > 0
                 ? ` · ${daysToEvent} days to go`
                 : daysToEvent === 0
                   ? ' · today'
                   : ' · this date has passed'}
             </p>
-            <p className="hint text-xs mt-0.5">Delay a task and everything that depends on it moves too.</p>
+            <p className="hint text-xs mt-0.5">
+              Delay a task and everything that depends on it moves too.
+            </p>
           </div>
           <div className="flex flex-wrap items-center gap-2">
             <button

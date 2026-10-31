@@ -60,7 +60,11 @@ export function TaskRow({
               : 'border-line text-ink-soft'
         }`}
       >
-        {done ? <Icon name="check" className="h-3.5 w-3.5" /> : <span className="h-2 w-2 rounded-full bg-ink-soft/40" />}
+        {done ? (
+          <Icon name="check" className="h-3.5 w-3.5" />
+        ) : (
+          <span className="h-2 w-2 rounded-full bg-ink-soft/40" />
+        )}
       </span>
 
       <div
@@ -74,13 +78,19 @@ export function TaskRow({
       >
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div className="min-w-0 flex-1">
-            <h4 className={`text-base font-bold text-ink ${done ? 'text-ink-soft line-through' : ''}`}>
+            <h4
+              className={`text-base font-bold text-ink ${done ? 'text-ink-soft line-through' : ''}`}
+            >
               {task.title}
             </h4>
             <p className="tabular mt-0.5 text-xs sm:text-sm text-ink-soft">
-              <span className="font-medium text-ink">{categoryLabel(occasion, task.category)}</span> · Due {formatDate(task.dueDate)}
+              <span className="font-medium text-ink">{categoryLabel(occasion, task.category)}</span>{' '}
+              · Due {formatDate(task.dueDate)}
               {shifted && !done && (
-                <span className="text-warn font-semibold"> · Now expected {formatDate(task.effectiveDate)}</span>
+                <span className="text-warn font-semibold">
+                  {' '}
+                  · Now expected {formatDate(task.effectiveDate)}
+                </span>
               )}
             </p>
           </div>
@@ -141,7 +151,11 @@ export function TaskRow({
               {done ? 'Mark as to do' : 'Done'}
             </button>
             {!done && !editing && (
-              <button type="button" className="btn-secondary text-xs" onClick={() => setEditing(true)}>
+              <button
+                type="button"
+                className="btn-secondary text-xs"
+                onClick={() => setEditing(true)}
+              >
                 {delayed ? 'Change delay' : 'Mark delayed'}
               </button>
             )}

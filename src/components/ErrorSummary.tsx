@@ -21,7 +21,10 @@ export function ErrorSummary({ errors, attempt }: { errors: FieldError[]; attemp
       aria-labelledby="error-summary-h"
       className="rounded-2xl border border-warn/40 bg-warn-soft p-4 sm:p-5 text-warn shadow-soft outline-none"
     >
-      <h3 id="error-summary-h" className="flex items-center gap-2 font-bold text-sm sm:text-base text-warn">
+      <h3
+        id="error-summary-h"
+        className="flex items-center gap-2 font-bold text-sm sm:text-base text-warn"
+      >
         <Icon name="alert" className="h-4 w-4 shrink-0" />
         Please fix {errors.length} {errors.length === 1 ? 'thing' : 'things'} to create your plan
       </h3>

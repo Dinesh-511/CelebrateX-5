@@ -174,10 +174,15 @@ export function AssistantPanel({
           <AiError message={ai.state.message} onRetry={() => void askAi()} />
         )}
         {ai.state.status === 'done' && (
-          <div className="rounded-2xl border border-accent/20 bg-accent-soft p-5 shadow-soft" data-testid="ai-review">
+          <div
+            className="rounded-2xl border border-accent/20 bg-accent-soft p-5 shadow-soft"
+            data-testid="ai-review"
+          >
             <div className="flex items-center gap-2 mb-2">
               <Icon name="sparkle" className="h-4 w-4 text-accent" />
-              <p className="text-xs font-bold uppercase tracking-wider text-accent">AI Plan Synthesis</p>
+              <p className="text-xs font-bold uppercase tracking-wider text-accent">
+                AI Plan Synthesis
+              </p>
             </div>
             <p className="text-sm font-medium text-ink">{ai.state.data.summary}</p>
             <ol className="mt-3 list-decimal space-y-2.5 pl-5 text-sm text-ink-soft">

@@ -14,4 +14,3 @@ export const BRAND = {
   version: '2.5.0',
   year: '2026',
 } as const;
-

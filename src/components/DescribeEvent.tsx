@@ -81,9 +81,7 @@ export function DescribeEvent({ onParsed }: { onParsed: (result: IntakeParse) =>
           <Icon name="sparkle" className="h-4 w-4" />
           Fill form from description
         </button>
-        <span className="text-[11px] text-ink-soft">
-          {description.length}/1000 · AI suggestion
-        </span>
+        <span className="text-[11px] text-ink-soft">{description.length}/1000 · AI suggestion</span>
       </div>
 
       <div className="mt-3" aria-live="polite">

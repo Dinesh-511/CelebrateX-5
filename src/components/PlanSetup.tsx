@@ -138,7 +138,12 @@ export function PlanSetup({
       )}
       <DescribeEvent onParsed={applyParsed} />
 
-      <form className="card space-y-5 shadow-soft" onSubmit={submit} noValidate aria-labelledby="essentials-h">
+      <form
+        className="card space-y-5 shadow-soft"
+        onSubmit={submit}
+        noValidate
+        aria-labelledby="essentials-h"
+      >
         <div className="border-b border-line pb-3">
           <h2 id="essentials-h" className="text-lg sm:text-xl font-bold text-ink">
             The essentials

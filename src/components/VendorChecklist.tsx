@@ -29,7 +29,8 @@ export function VendorChecklist({
             Vendor checklist
           </h2>
           <p className="hint text-xs mt-0.5">
-            Tick &quot;Contacted&quot; when you reach out. Saving or accepting a quotation updates status.
+            Tick &quot;Contacted&quot; when you reach out. Saving or accepting a quotation updates
+            status.
           </p>
         </div>
         <span className="rounded-full bg-accent-soft px-3 py-1 text-xs font-semibold text-accent border border-accent/20">

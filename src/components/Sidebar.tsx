@@ -25,14 +25,7 @@ export interface SidebarProps {
   onKeyDown: (event: KeyboardEvent<HTMLElement>) => void;
 }
 
-export function Sidebar({
-  plan,
-  tab,
-  onSelectTab,
-  onReset,
-  tabRefs,
-  onKeyDown,
-}: SidebarProps) {
+export function Sidebar({ plan, tab, onSelectTab, onReset, tabRefs, onKeyDown }: SidebarProps) {
   const [confirmReset, setConfirmReset] = useState(false);
   const [share, setShare] = useState<{ status: 'copied' | 'manual'; url: string } | null>(null);
   const readiness = plan ? planReadiness(plan) : null;
@@ -66,13 +59,18 @@ export function Sidebar({
                   {BRAND.nameSuffix}
                 </span>
               </div>
-              <p className="hidden text-[11px] text-ink-soft md:block mt-0.5 leading-snug">{BRAND.subtitle}</p>
+              <p className="hidden text-[11px] text-ink-soft md:block mt-0.5 leading-snug">
+                {BRAND.subtitle}
+              </p>
             </div>
           </div>
         </div>
 
         {readiness && (
-          <div className="mx-3 my-3 rounded-xl border border-line bg-paper/60 p-3 md:mx-4" aria-label="Plan readiness">
+          <div
+            className="mx-3 my-3 rounded-xl border border-line bg-paper/60 p-3 md:mx-4"
+            aria-label="Plan readiness"
+          >
             <p className="flex items-baseline justify-between text-xs font-semibold">
               <span className="text-ink">Plan readiness {readiness.percent}%</span>
               <span className="text-[11px] font-normal text-ink-soft">
@@ -143,11 +141,14 @@ export function Sidebar({
           {!plan && (
             <div className="mx-1 mt-4 hidden md:block rounded-xl border border-line/70 bg-paper/60 p-3.5 shadow-sm">
               <div className="flex items-center gap-2 text-xs font-semibold text-ink">
-                <span className="flex h-5 w-5 items-center justify-center rounded-full bg-accent/15 text-accent font-bold text-[10px]">✦</span>
+                <span className="flex h-5 w-5 items-center justify-center rounded-full bg-accent/15 text-accent font-bold text-[10px]">
+                  ✦
+                </span>
                 <span>Quick Start</span>
               </div>
               <p className="mt-1.5 text-[11px] leading-relaxed text-ink-soft">
-                Begin with <strong>Plan setup</strong> to set budget and guests. Timeline and vendor tools sync automatically.
+                Begin with <strong>Plan setup</strong> to set budget and guests. Timeline and vendor
+                tools sync automatically.
               </p>
             </div>
           )}
@@ -158,7 +159,11 @@ export function Sidebar({
         <p className="hidden md:block text-[11px] font-bold uppercase tracking-wider text-ink-muted mb-1">
           Actions & Workspace
         </p>
-        <div className={plan ? 'flex items-center gap-1.5 md:grid md:grid-cols-2' : 'flex items-center w-full'}>
+        <div
+          className={
+            plan ? 'flex items-center gap-1.5 md:grid md:grid-cols-2' : 'flex items-center w-full'
+          }
+        >
           <button
             type="button"
             className={`btn-secondary px-2.5 py-2 text-xs flex items-center justify-center gap-2 ${plan ? 'flex-1 md:flex-none' : 'w-full'}`}
@@ -166,7 +171,9 @@ export function Sidebar({
             aria-label={theme === 'dark' ? 'Switch to light theme' : 'Switch to dark theme'}
           >
             <Icon name={theme === 'dark' ? 'sun' : 'moon'} className="h-4 w-4 text-accent" />
-            <span className="sr-only sm:not-sr-only text-xs">{theme === 'dark' ? 'Light' : 'Dark'}</span>
+            <span className="sr-only sm:not-sr-only text-xs">
+              {theme === 'dark' ? 'Light' : 'Dark'}
+            </span>
           </button>
 
           {plan && (
@@ -239,5 +246,3 @@ export function Sidebar({
     </header>
   );
 }
-
-export { Sidebar as Header };

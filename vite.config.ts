@@ -28,7 +28,7 @@ export default defineConfig({
     coverage: {
       provider: 'v8',
       include: ['src/**/*.{ts,tsx}', 'api/**/*.ts'],
-      exclude: ['src/main.tsx', 'src/vite-env.d.ts'],
+      exclude: ['src/main.tsx', 'src/vite-env.d.ts', 'src/**/index.ts'],
       reporter: ['text-summary', 'text'],
       // Whole app (engine, UI, state, API). The few uncovered branches are defensive fallbacks.
       thresholds: { lines: 100, statements: 100, functions: 100, branches: 99 },

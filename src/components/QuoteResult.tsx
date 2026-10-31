@@ -56,8 +56,12 @@ export function QuoteResult({
       {cost !== null && (
         <div className="rounded-xl border border-line bg-card p-3.5 text-xs sm:text-sm">
           Effective cost <strong className="text-ink font-bold">{formatINR(cost)}</strong> against a{' '}
-          <span className="font-semibold">{categoryLabel(plan.occasion, quote.category)}</span> budget of{' '}
-          <strong className="text-ink font-bold">{formatINR(plan.allocation[quote.category])}</strong>.
+          <span className="font-semibold">{categoryLabel(plan.occasion, quote.category)}</span>{' '}
+          budget of{' '}
+          <strong className="text-ink font-bold">
+            {formatINR(plan.allocation[quote.category])}
+          </strong>
+          .
         </div>
       )}
 
@@ -118,11 +122,14 @@ export function QuoteResult({
 
       {full && (
         <p className="text-xs text-ink-soft">
-          You already have {MAX_QUOTES_PER_CATEGORY} quotations for this category. Remove one below to add another.
+          You already have {MAX_QUOTES_PER_CATEGORY} quotations for this category. Remove one below
+          to add another.
         </p>
       )}
       {cost === null && (
-        <p className="text-xs text-ink-soft">A quotation needs a price before it can be accepted.</p>
+        <p className="text-xs text-ink-soft">
+          A quotation needs a price before it can be accepted.
+        </p>
       )}
 
       <div aria-live="polite">

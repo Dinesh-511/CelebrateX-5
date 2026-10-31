@@ -4,23 +4,21 @@ import type { Action } from '../state/planStore';
 import { Icon } from './Icon';
 import { EstimateBadge } from './ui';
 
-function CategoryTable({
-  plan,
-  category,
-  quotes,
-  dispatch,
-}: {
+interface TableProps {
   plan: Plan;
   category: Category;
   quotes: StoredQuote[];
   dispatch: (a: Action) => void;
-}) {
+}
+
+function CategoryTable({ plan, category, quotes, dispatch }: TableProps) {
   const label = categoryLabel(plan.occasion, category);
   const budget = plan.allocation[category];
-  const cols = quotes.map((s) => {
-    const cost = effectiveCost(s.quote, plan.guests);
-    return { s, cost, flags: compareQuote(s.quote, plan) };
-  });
+  const cols = quotes.map((s) => ({
+    s,
+    cost: effectiveCost(s.quote, plan.guests),
+    flags: compareQuote(s.quote, plan),
+  }));
   const cell = (render: (c: (typeof cols)[number]) => React.ReactNode) =>
     cols.map((c) => (
       <td key={c.s.id} className="border-b border-line px-3.5 py-3 text-xs sm:text-sm">
@@ -35,7 +33,9 @@ function CategoryTable({
           <h3 id={`cmp-${category}`} className="text-base font-bold text-ink">
             {label}: compare quotations
           </h3>
-          <p className="hint text-xs mt-0.5">Budget for this category: <strong className="text-ink">{formatINR(budget)}</strong></p>
+          <p className="hint text-xs mt-0.5">
+            Budget for this category: <strong className="text-ink">{formatINR(budget)}</strong>
+          </p>
         </div>
         <EstimateBadge verified={quotes.some((q) => q.accepted)} />
       </div>
@@ -44,7 +44,10 @@ function CategoryTable({
         <caption className="sr-only">Side-by-side quotations for {label}</caption>
         <thead>
           <tr className="bg-paper/70">
-            <th scope="col" className="border-b border-line px-3.5 py-2.5 text-xs font-semibold uppercase tracking-wider text-ink-soft rounded-tl-xl">
+            <th
+              scope="col"
+              className="border-b border-line px-3.5 py-2.5 text-xs font-semibold uppercase tracking-wider text-ink-soft rounded-tl-xl"
+            >
               <span className="sr-only">Detail</span>
             </th>
             {cols.map((c, i) => (
@@ -69,7 +72,10 @@ function CategoryTable({
         </thead>
         <tbody className="divide-y divide-line/60">
           <tr className="hover:bg-paper/30 transition-colors">
-            <th scope="row" className="border-b border-line px-3.5 py-3 text-xs font-semibold text-ink-soft bg-paper/30">
+            <th
+              scope="row"
+              className="border-b border-line px-3.5 py-3 text-xs font-semibold text-ink-soft bg-paper/30"
+            >
               Effective cost for {plan.guests} guests
             </th>
             {cell((c) =>
@@ -81,7 +87,10 @@ function CategoryTable({
             )}
           </tr>
           <tr className="hover:bg-paper/30 transition-colors">
-            <th scope="row" className="border-b border-line px-3.5 py-3 text-xs font-semibold text-ink-soft bg-paper/30">
+            <th
+              scope="row"
+              className="border-b border-line px-3.5 py-3 text-xs font-semibold text-ink-soft bg-paper/30"
+            >
               Against budget
             </th>
             {cell((c) =>
@@ -101,21 +110,34 @@ function CategoryTable({
             )}
           </tr>
           <tr className="hover:bg-paper/30 transition-colors">
-            <th scope="row" className="border-b border-line px-3.5 py-3 text-xs font-semibold text-ink-soft bg-paper/30">
+            <th
+              scope="row"
+              className="border-b border-line px-3.5 py-3 text-xs font-semibold text-ink-soft bg-paper/30"
+            >
               Per plate
             </th>
             {cell((c) =>
-              c.s.quote.pricePerPlate === null ? '-' : <span className="tabular">{formatINR(c.s.quote.pricePerPlate)}</span>,
+              c.s.quote.pricePerPlate === null ? (
+                '-'
+              ) : (
+                <span className="tabular">{formatINR(c.s.quote.pricePerPlate)}</span>
+              ),
             )}
           </tr>
           <tr className="hover:bg-paper/30 transition-colors">
-            <th scope="row" className="border-b border-line px-3.5 py-3 text-xs font-semibold text-ink-soft bg-paper/30">
+            <th
+              scope="row"
+              className="border-b border-line px-3.5 py-3 text-xs font-semibold text-ink-soft bg-paper/30"
+            >
               Guest minimum
             </th>
             {cell((c) => c.s.quote.guestMinimum ?? '-')}
           </tr>
           <tr className="hover:bg-paper/30 transition-colors">
-            <th scope="row" className="border-b border-line px-3.5 py-3 text-xs font-semibold text-ink-soft bg-paper/30">
+            <th
+              scope="row"
+              className="border-b border-line px-3.5 py-3 text-xs font-semibold text-ink-soft bg-paper/30"
+            >
               Advance
             </th>
             {cell((c) =>
@@ -123,7 +145,10 @@ function CategoryTable({
             )}
           </tr>
           <tr className="hover:bg-paper/30 transition-colors">
-            <th scope="row" className="border-b border-line px-3.5 py-3 text-xs font-semibold text-ink-soft bg-paper/30">
+            <th
+              scope="row"
+              className="border-b border-line px-3.5 py-3 text-xs font-semibold text-ink-soft bg-paper/30"
+            >
               Tax
             </th>
             {cell((c) =>
@@ -135,7 +160,10 @@ function CategoryTable({
             )}
           </tr>
           <tr className="hover:bg-paper/30 transition-colors">
-            <th scope="row" className="border-b border-line px-3.5 py-3 text-xs font-semibold text-ink-soft bg-paper/30">
+            <th
+              scope="row"
+              className="border-b border-line px-3.5 py-3 text-xs font-semibold text-ink-soft bg-paper/30"
+            >
               Things to check
             </th>
             {cell((c) =>
@@ -157,7 +185,10 @@ function CategoryTable({
             )}
           </tr>
           <tr>
-            <th scope="row" className="border-b border-line px-3.5 py-3 text-xs font-semibold text-ink-soft bg-paper/30">
+            <th
+              scope="row"
+              className="border-b border-line px-3.5 py-3 text-xs font-semibold text-ink-soft bg-paper/30"
+            >
               Actions
             </th>
             {cell((c) => (
@@ -202,7 +233,8 @@ export function QuoteComparison({ plan, dispatch }: { plan: Plan; dispatch: (a: 
         </div>
         <p className="text-sm font-medium text-ink">No quotations saved yet</p>
         <p className="hint text-xs max-w-md mx-auto mt-1">
-          Analyze a quotation above and save it to compare up to three vendors side-by-side per category.
+          Analyze a quotation above and save it to compare up to three vendors side-by-side per
+          category.
         </p>
       </div>
     );

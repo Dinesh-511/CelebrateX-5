@@ -69,7 +69,8 @@ export default function App({
     const index = TABS.findIndex((t) => t.id === tab);
     let next = index;
     if (event.key === 'ArrowRight' || event.key === 'ArrowDown') next = (index + 1) % TABS.length;
-    else if (event.key === 'ArrowLeft' || event.key === 'ArrowUp') next = (index - 1 + TABS.length) % TABS.length;
+    else if (event.key === 'ArrowLeft' || event.key === 'ArrowUp')
+      next = (index - 1 + TABS.length) % TABS.length;
     else if (event.key === 'Home') next = 0;
     else if (event.key === 'End') next = TABS.length - 1;
     else return;
@@ -132,7 +133,11 @@ export default function App({
               {notice.kind === 'bad_link' && <Icon name="alert" className="h-4 w-4 shrink-0" />}
               {notice.message}
             </p>
-            <button type="button" className="btn-quiet shrink-0 text-xs" onClick={() => setNotice(null)}>
+            <button
+              type="button"
+              className="btn-quiet shrink-0 text-xs"
+              onClick={() => setNotice(null)}
+            >
               Dismiss
             </button>
           </div>
@@ -162,7 +167,13 @@ export default function App({
                 }}
               />
               {plan && (
-                <Suspense fallback={<p role="status" className="card text-ink-soft">Loading ideas…</p>}>
+                <Suspense
+                  fallback={
+                    <p role="status" className="card text-ink-soft">
+                      Loading ideas…
+                    </p>
+                  }
+                >
                   <IdeasPanel plan={plan} />
                 </Suspense>
               )}
@@ -173,7 +184,13 @@ export default function App({
             (plan ? <TimelineTab plan={plan} today={today} dispatch={dispatch} /> : needPlan)}
           {tab === 'vendors' &&
             (plan ? (
-              <Suspense fallback={<p role="status" className="card text-ink-soft">Loading vendors…</p>}>
+              <Suspense
+                fallback={
+                  <p role="status" className="card text-ink-soft">
+                    Loading vendors…
+                  </p>
+                }
+              >
                 <VendorsTab plan={plan} dispatch={dispatch} />
               </Suspense>
             ) : (

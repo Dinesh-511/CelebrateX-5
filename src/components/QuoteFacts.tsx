@@ -28,7 +28,10 @@ export function QuoteFacts({ quote, guests }: { quote: Quote; guests: number }) 
         <tbody className="divide-y divide-line/60">
           {rows.map(([k, v]) => (
             <tr key={k} className="hover:bg-paper/30 transition-colors">
-              <th scope="row" className="w-2/5 px-3.5 py-2 text-xs font-semibold text-ink-soft bg-paper/20">
+              <th
+                scope="row"
+                className="w-2/5 px-3.5 py-2 text-xs font-semibold text-ink-soft bg-paper/20"
+              >
                 {k}
               </th>
               <td className="px-3.5 py-2 text-xs sm:text-sm text-ink">{v}</td>

@@ -142,21 +142,9 @@ export function BrandMark({ className = 'h-9 w-9' }: { className?: string }) {
         </linearGradient>
       </defs>
       <rect width="36" height="36" rx="10" fill="url(#brand-grad)" />
-      <path
-        d="M18 7.5c2.8 3.2 4.2 6.8 0 14-4.2-7.2-2.8-10.8 0-14z"
-        fill="#ffffff"
-        opacity="0.95"
-      />
-      <path
-        d="M9.5 13.5c3.2.4 5.8 2.8 8 7.2-4.2 1-7.2-.6-8-7.2z"
-        fill="#38bdf8"
-        opacity="0.9"
-      />
-      <path
-        d="M26.5 13.5c-3.2.4-5.8 2.8-8 7.2 4.2 1 7.2-.6 8-7.2z"
-        fill="#f59e0b"
-        opacity="0.9"
-      />
+      <path d="M18 7.5c2.8 3.2 4.2 6.8 0 14-4.2-7.2-2.8-10.8 0-14z" fill="#ffffff" opacity="0.95" />
+      <path d="M9.5 13.5c3.2.4 5.8 2.8 8 7.2-4.2 1-7.2-.6-8-7.2z" fill="#38bdf8" opacity="0.9" />
+      <path d="M26.5 13.5c-3.2.4-5.8 2.8-8 7.2 4.2 1 7.2-.6 8-7.2z" fill="#f59e0b" opacity="0.9" />
       <circle cx="18" cy="24.5" r="1.5" fill="#ffffff" />
     </svg>
   );

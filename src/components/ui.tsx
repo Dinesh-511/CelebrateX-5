@@ -95,11 +95,17 @@ export function EmptyState({
       <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-3xl bg-accent-soft text-accent border border-accent/30 shadow-inner">
         <Icon name="pencil" className="h-7 w-7" />
       </div>
-      <p className="text-xl sm:text-2xl font-bold text-ink max-w-md mx-auto leading-snug">{title}</p>
+      <p className="text-xl sm:text-2xl font-bold text-ink max-w-md mx-auto leading-snug">
+        {title}
+      </p>
       <p className="mt-2 text-xs sm:text-sm text-ink-soft max-w-sm mx-auto">
         Configure your event in Plan setup to activate your intelligent celebration dashboard.
       </p>
-      <button type="button" className="btn-primary mt-6 text-xs sm:text-sm px-7 py-3 shadow-md shadow-accent/25 hover:shadow-lg transition-all" onClick={onAction}>
+      <button
+        type="button"
+        className="btn-primary mt-6 text-xs sm:text-sm px-7 py-3 shadow-md shadow-accent/25 hover:shadow-lg transition-all"
+        onClick={onAction}
+      >
         {action}
       </button>
     </div>

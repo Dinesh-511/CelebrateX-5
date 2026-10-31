@@ -85,7 +85,12 @@ export function ProgressPanel({
             <h2 className="text-base sm:text-lg font-bold text-ink">Plan progress</h2>
             <span className="badge-verified text-[11px] font-bold">{readiness.percent}% Ready</span>
           </div>
-          <button ref={closeRef} type="button" className="btn-secondary text-xs px-3 py-1.5" onClick={onToggle}>
+          <button
+            ref={closeRef}
+            type="button"
+            className="btn-secondary text-xs px-3 py-1.5"
+            onClick={onToggle}
+          >
             <Icon name="x" className="h-3.5 w-3.5" />
             Hide
           </button>
@@ -95,23 +100,33 @@ export function ProgressPanel({
           <div className="rounded-xl border border-line bg-paper/60 p-3.5 text-xs sm:text-sm shadow-2xs">
             <p className="font-semibold text-ink">
               <strong>{readiness.percent}% ready.</strong> {readiness.tasksDone} of{' '}
-              {readiness.tasksTotal} tasks done, {readiness.quotesVerified} of {readiness.quotesTotal}{' '}
-              vendors confirmed.
+              {readiness.tasksTotal} tasks done, {readiness.quotesVerified} of{' '}
+              {readiness.quotesTotal} vendors confirmed.
             </p>
           </div>
 
           <section aria-labelledby="progress-vendors" className="space-y-3">
             <div className="flex items-center justify-between gap-2 border-b border-line pb-2">
-              <h3 id="progress-vendors" className="text-xs font-bold uppercase tracking-wider text-ink-soft">
+              <h3
+                id="progress-vendors"
+                className="text-xs font-bold uppercase tracking-wider text-ink-soft"
+              >
                 Vendors and quotations
               </h3>
-              <button type="button" className="btn-quiet text-xs font-bold" onClick={() => onNavigate('vendors')}>
+              <button
+                type="button"
+                className="btn-quiet text-xs font-bold"
+                onClick={() => onNavigate('vendors')}
+              >
                 Open
               </button>
             </div>
             <ul className="space-y-2">
               {vendors.map((item) => (
-                <li key={item.category} className="flex items-start gap-2.5 rounded-lg p-1.5 text-xs sm:text-sm hover:bg-paper/40 transition-colors">
+                <li
+                  key={item.category}
+                  className="flex items-start gap-2.5 rounded-lg p-1.5 text-xs sm:text-sm hover:bg-paper/40 transition-colors"
+                >
                   <Tick done={item.status === 'quote_accepted'} />
                   <div className="min-w-0">
                     <p className="font-semibold text-ink">{item.label}</p>
@@ -127,19 +142,31 @@ export function ProgressPanel({
 
           <section aria-labelledby="progress-tasks" className="space-y-3">
             <div className="flex items-center justify-between gap-2 border-b border-line pb-2">
-              <h3 id="progress-tasks" className="text-xs font-bold uppercase tracking-wider text-ink-soft">
+              <h3
+                id="progress-tasks"
+                className="text-xs font-bold uppercase tracking-wider text-ink-soft"
+              >
                 Timeline tasks
               </h3>
-              <button type="button" className="btn-quiet text-xs font-bold" onClick={() => onNavigate('timeline')}>
+              <button
+                type="button"
+                className="btn-quiet text-xs font-bold"
+                onClick={() => onNavigate('timeline')}
+              >
                 Open
               </button>
             </div>
             <ul className="space-y-2">
               {tasks.map((task) => (
-                <li key={task.id} className="flex items-start gap-2.5 rounded-lg p-1.5 text-xs sm:text-sm hover:bg-paper/40 transition-colors">
+                <li
+                  key={task.id}
+                  className="flex items-start gap-2.5 rounded-lg p-1.5 text-xs sm:text-sm hover:bg-paper/40 transition-colors"
+                >
                   <Tick done={task.status === 'done'} warn={task.status === 'delayed'} />
                   <div className="min-w-0">
-                    <p className={`font-semibold text-ink ${task.status === 'done' ? 'text-ink-soft line-through' : ''}`}>
+                    <p
+                      className={`font-semibold text-ink ${task.status === 'done' ? 'text-ink-soft line-through' : ''}`}
+                    >
                       {task.title}
                     </p>
                     <p className="text-[11px] text-ink-soft">{TASK_LABEL[task.status]}</p>

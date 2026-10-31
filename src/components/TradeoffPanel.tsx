@@ -43,9 +43,12 @@ export function TradeoffPanel({
   if (options.length === 0) {
     return (
       <section className="card shadow-soft" aria-labelledby="options-h">
-        <h2 id="options-h" className="text-xl font-bold">Ways to close the gap</h2>
+        <h2 id="options-h" className="text-xl font-bold">
+          Ways to close the gap
+        </h2>
         <p className="mt-2 text-sm text-ink-soft">
-          No automatic option fits {formatINR(overBy)}. Try fewer guests, a bigger total budget, or unlock categories so money can move.
+          No automatic option fits {formatINR(overBy)}. Try fewer guests, a bigger total budget, or
+          unlock categories so money can move.
         </p>
       </section>
     );
@@ -56,7 +59,9 @@ export function TradeoffPanel({
     <section className="card shadow-soft" aria-labelledby="options-h">
       <div className="flex flex-wrap items-center justify-between gap-3 border-b border-line pb-4">
         <div>
-          <h2 id="options-h" className="text-xl font-bold">Ways to close the gap</h2>
+          <h2 id="options-h" className="text-xl font-bold">
+            Ways to close the gap
+          </h2>
           <p className="hint text-xs mt-0.5">Nothing changes until you apply an option.</p>
         </div>
         <button
@@ -94,7 +99,9 @@ export function TradeoffPanel({
                   Saves {formatINR(o.coversRupees)}
                 </span>
               </div>
-              <p className="mt-2 text-xs sm:text-sm text-ink-soft leading-relaxed">{o.description}</p>
+              <p className="mt-2 text-xs sm:text-sm text-ink-soft leading-relaxed">
+                {o.description}
+              </p>
               {o.changes.length > 0 && (
                 <div className="mt-3 rounded-lg border border-line bg-card/70 p-2.5 text-xs font-medium text-ink">
                   {describeChanges(plan.occasion, o.changes)}
@@ -109,8 +116,12 @@ export function TradeoffPanel({
               {explanation && (
                 <div className="mt-3 rounded-xl border border-accent/20 bg-accent-soft p-3 text-xs leading-relaxed">
                   <p className="font-medium text-ink">{explanation.summary}</p>
-                  <p className="mt-1.5 font-semibold text-accent">Best when: {explanation.bestWhen}</p>
-                  <p className="mt-1 text-[10px] text-ink-soft">AI explanation of the figures above</p>
+                  <p className="mt-1.5 font-semibold text-accent">
+                    Best when: {explanation.bestWhen}
+                  </p>
+                  <p className="mt-1 text-[10px] text-ink-soft">
+                    AI explanation of the figures above
+                  </p>
                 </div>
               )}
               <div className="mt-auto pt-5">

@@ -9,7 +9,8 @@ export function RunSheet({ occasion }: { occasion: Occasion }) {
           On the day: suggested run sheet
         </h3>
         <p className="hint text-xs mt-0.5">
-          Typical timings to share with family and vendors. Adjust them to your muhurat and venue slot.
+          Typical timings to share with family and vendors. Adjust them to your muhurat and venue
+          slot.
         </p>
       </div>
       <ol className="mt-4 space-y-2.5">

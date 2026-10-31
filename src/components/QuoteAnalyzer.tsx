@@ -59,7 +59,8 @@ export function QuoteAnalyzer({
           Paste a vendor quotation
         </h2>
         <p className="hint text-xs sm:text-sm mt-0.5">
-          Copy the message or PDF text your vendor sent. We pull out the details and flag the fine print.
+          Copy the message or PDF text your vendor sent. We pull out the details and flag the fine
+          print.
         </p>
       </div>
 

@@ -70,7 +70,10 @@ export const CategoryRow = memo(function CategoryRow({
     >
       <div>
         <div className="flex items-center gap-2.5">
-          <span aria-hidden="true" className={`h-3.5 w-3.5 shrink-0 rounded-full shadow-2xs ${swatchClass}`} />
+          <span
+            aria-hidden="true"
+            className={`h-3.5 w-3.5 shrink-0 rounded-full shadow-2xs ${swatchClass}`}
+          />
           <h3 className="font-bold text-sm text-ink">{label}</h3>
         </div>
         <p className="tabular mt-0.5 text-xs text-ink-soft">
