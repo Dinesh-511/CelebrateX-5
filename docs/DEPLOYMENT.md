@@ -19,15 +19,15 @@ The app is built for Vercel: the Vite build is served as static files and every 
 
 ```bash
 # Security headers (expect a strict CSP with style-src 'self', HSTS, X-Frame-Options DENY)
-curl -sI https://<your-app>.vercel.app/
+curl -sI https://celebrate-x-5.vercel.app/
 
 # Cross-site and origin-less calls are refused
-curl -s -X POST https://<your-app>.vercel.app/api/parse-intake -H "Content-Type: application/json" -d '{}'
+curl -s -X POST https://celebrate-x-5.vercel.app/api/parse-intake -H "Content-Type: application/json" -d '{}'
 # -> {"error":"FORBIDDEN_ORIGIN"}
 
 # A same-origin call works
-curl -s -X POST https://<your-app>.vercel.app/api/parse-intake \
-  -H "Content-Type: application/json" -H "Origin: https://<your-app>.vercel.app" \
+curl -s -X POST https://celebrate-x-5.vercel.app/api/parse-intake \
+  -H "Content-Type: application/json" -H "Origin: https://celebrate-x-5.vercel.app" \
   -d '{"text":"Shaadi in Pune, 200 guests, 8 lakh, mid-Feb"}'
 ```
 

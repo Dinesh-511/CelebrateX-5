@@ -75,7 +75,7 @@ Then just **ask**: _"Kitna kharcha bacha hai?"_, _"What should we book first?"_,
 
 ## ⏱️ Try it in two minutes
 
-Open the **[live app](https://promptwars-challenge-5.vercel.app/)** and follow Priya's shaadi:
+Open the **[live app](https://celebrate-x-5.vercel.app/)** and follow Priya's shaadi:
 
 1. ✍️ **Describe it** in your own words: _"Shaadi in Pune, 200 guests, 8 lakh budget, mid-Feb, simple ceremony but premium food"_ and press **Fill form from description**. Gemini fills the form; you can still edit everything.
 2. 💰 **Budget.** Catering is boosted because "premium food" matters most. Drag **Photography** up and a toast shows exactly what shrank. **Lock** catering to protect it.
@@ -272,8 +272,8 @@ AI responses are cached server-side for 10 minutes, an AI request is **cancelled
 ## 🚀 Run it locally
 
 ```bash
-git clone https://github.com/akshayparihardev/Promptwars-Challenge-5.git
-cd Promptwars-Challenge-5
+git clone https://github.com/Dinesh-511/CelebrateX-5.git
+cd CelebrateX-5
 npm install
 cp .env.example .env     # add your GEMINI_API_KEY
 npm run dev              # UI and /api together (same handlers as production)
