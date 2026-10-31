@@ -7,14 +7,14 @@
 One connected plan for budget, timeline and vendors, built for Indian families.<br/>
 Change the guest count and watch catering, budget and warnings move together.
 
-[![CI](https://github.com/akshayparihardev/Promptwars-Challenge-5/actions/workflows/ci.yml/badge.svg)](https://github.com/akshayparihardev/Promptwars-Challenge-5/actions)
+[![CI](https://github.com/Dinesh-511/CelebrateX-5/actions/workflows/ci.yml/badge.svg)](https://github.com/Dinesh-511/CelebrateX-5/actions)
 ![Tests](https://img.shields.io/badge/tests-405%20unit%20%2B%2014%20e2e-2f6b45)
 ![a11y](https://img.shields.io/badge/axe-0%20violations%20(light%20%26%20dark)-2f6b45)
 ![Coverage](https://img.shields.io/badge/coverage-100%25%20lines-2f6b45)
 ![TypeScript](https://img.shields.io/badge/TypeScript-strict-3178c6)
 ![Gemini](https://img.shields.io/badge/Gemini-model%20chain-5e2750)
 
-**[🌐 Live app](https://promptwars-challenge-5.vercel.app/)** · Built for PromptWars Virtual, Challenge 5: Celebration & Event Planner
+**[🌐 Live app](https://celebrate-x-5.vercel.app/)** · Built for PromptWars Virtual, Challenge 5: Celebration & Event Planner
 
 </div>
 
@@ -282,6 +282,7 @@ npm run dev              # UI and /api together (same handlers as production)
 | Command | What it does |
 | --- | --- |
 | `npm run check` | typecheck, lint and all unit tests |
+| `npm run security:check` | dependency audit, secret scanning, and HTTP security guards |
 | `npm run coverage` | tests with coverage thresholds (100% lines, statements and functions; 99% branches) |
 | `npm run e2e` | Playwright end-to-end and axe checks (`npx playwright install chromium` once) |
 | `npm run format:check` | Prettier check (also run in CI) |
@@ -315,7 +316,7 @@ Import the repo into Vercel (Framework: Vite), add `GEMINI_API_KEY` and `GEMINI_
 
 ## 📚 Docs
 
-[Architecture](docs/ARCHITECTURE.md) · [Testing](docs/TESTING.md) · [Accessibility](docs/ACCESSIBILITY.md) · [Deployment](docs/DEPLOYMENT.md) · [Security](SECURITY.md) · [Contributing](CONTRIBUTING.md)
+[Architecture](docs/ARCHITECTURE.md) · [Testing](docs/TESTING.md) · [Accessibility](docs/ACCESSIBILITY.md) · [Deployment](docs/DEPLOYMENT.md) · [Security](SECURITY.md) · [Security Audit](docs/SECURITY_AUDIT.md) · [Contributing](CONTRIBUTING.md)
 
 ## 🗂️ Project layout
 
