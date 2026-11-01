@@ -9,6 +9,7 @@ import {
 } from 'react';
 import { AssistantPanel } from './components/AssistantPanel';
 import { BudgetTab } from './components/BudgetTab';
+import { ErrorBoundary } from './components/ErrorBoundary';
 import { Icon } from './components/Icon';
 import { PlanMasthead } from './components/PlanMasthead';
 import { PlanSetup } from './components/PlanSetup';
@@ -91,127 +92,135 @@ export default function App({
   );
 
   return (
-    <div className="min-h-screen bg-paper text-ink md:flex">
-      <a
-        href="#main"
-        className="sr-only-focusable no-print fixed left-3 top-3 z-50 rounded-xl bg-accent px-4 py-2 text-sm font-semibold text-on-accent shadow-elevated"
-      >
-        Skip to main content
-      </a>
-      <Sidebar
-        plan={plan}
-        tab={tab}
-        onSelectTab={setTab}
-        tabRefs={refs}
-        onKeyDown={onKeyDown}
-        onReset={() => {
-          dispatch({ type: 'reset' });
-          setTab('setup');
-          if (window.location.hash) window.history.replaceState(null, '', window.location.pathname);
-        }}
-      />
-
-      <main
-        id="main"
-        className="no-print flex-1 min-w-0 px-4 py-6 sm:px-8 max-w-6xl mx-auto"
-        onPointerDownCapture={(event) => {
-          if (plan && event.target instanceof HTMLInputElement && event.target.type === 'range') {
-            setGrabbed(plan);
-          }
-        }}
-      >
-        {notice && (
-          <div
-            role="status"
-            className={`mb-6 flex items-start justify-between gap-3 rounded-2xl border p-4 text-sm shadow-soft ${
-              notice.kind === 'bad_link'
-                ? 'border-warn/40 bg-warn-soft text-warn'
-                : 'border-line bg-card'
-            }`}
-          >
-            <p className="flex items-center gap-2">
-              {notice.kind === 'bad_link' && <Icon name="alert" className="h-4 w-4 shrink-0" />}
-              {notice.message}
-            </p>
-            <button
-              type="button"
-              className="btn-quiet shrink-0 text-xs"
-              onClick={() => setNotice(null)}
-            >
-              Dismiss
-            </button>
-          </div>
-        )}
-
-        {plan && <PlanMasthead plan={plan} today={today} />}
-        {plan && <AssistantPanel plan={grabbed ?? plan} today={today} onNavigate={setTab} />}
-
-        <div
-          role="tabpanel"
-          id={`panel-${tab}`}
-          aria-labelledby={`tab-${tab}`}
-          tabIndex={0}
-          className="panel-enter outline-none"
-          key={tab}
+    <ErrorBoundary>
+      <div className="min-h-screen bg-paper text-ink md:flex">
+        <a
+          href="#main"
+          className="sr-only-focusable no-print fixed left-3 top-3 z-50 rounded-xl bg-accent px-4 py-2 text-sm font-semibold text-on-accent shadow-elevated"
         >
-          {tab === 'setup' && (
-            <div className="space-y-6">
-              <PlanSetup
-                key={plan ? 'existing' : 'new'}
-                today={today}
-                existing={plan}
-                onCreate={(created) => {
-                  focusTitleNext.current = true;
-                  dispatch({ type: 'create', plan: created });
-                  setTab('budget');
-                }}
-              />
-              {plan && (
+          Skip to main content
+        </a>
+        <Sidebar
+          plan={plan}
+          tab={tab}
+          onSelectTab={setTab}
+          tabRefs={refs}
+          onKeyDown={onKeyDown}
+          onReset={() => {
+            dispatch({ type: 'reset' });
+            setTab('setup');
+            if (window.location.hash)
+              window.history.replaceState(null, '', window.location.pathname);
+          }}
+        />
+
+        <main
+          id="main"
+          tabIndex={-1}
+          className="no-print flex-1 min-w-0 px-4 py-6 sm:px-8 max-w-6xl mx-auto outline-none"
+          onPointerDownCapture={(event) => {
+            if (plan && event.target instanceof HTMLInputElement && event.target.type === 'range') {
+              setGrabbed(plan);
+            }
+          }}
+        >
+          {notice && (
+            <div
+              role="status"
+              className={`mb-6 flex items-start justify-between gap-3 rounded-2xl border p-4 text-sm shadow-soft ${
+                notice.kind === 'bad_link'
+                  ? 'border-warn/40 bg-warn-soft text-warn'
+                  : 'border-line bg-card'
+              }`}
+            >
+              <p className="flex items-center gap-2">
+                {notice.kind === 'bad_link' && <Icon name="alert" className="h-4 w-4 shrink-0" />}
+                {notice.message}
+              </p>
+              <button
+                type="button"
+                className="btn-quiet shrink-0 text-xs"
+                onClick={() => setNotice(null)}
+              >
+                Dismiss
+              </button>
+            </div>
+          )}
+
+          {plan && <PlanMasthead plan={plan} today={today} />}
+          {plan && <AssistantPanel plan={grabbed ?? plan} today={today} onNavigate={setTab} />}
+
+          <div
+            role="tabpanel"
+            id={`panel-${tab}`}
+            aria-labelledby={`tab-${tab}`}
+            tabIndex={0}
+            className="panel-enter outline-none"
+            key={tab}
+          >
+            {tab === 'setup' && (
+              <div className="space-y-6">
+                <PlanSetup
+                  key={plan ? 'existing' : 'new'}
+                  today={today}
+                  existing={plan}
+                  onCreate={(created) => {
+                    focusTitleNext.current = true;
+                    dispatch({ type: 'create', plan: created });
+                    setTab('budget');
+                  }}
+                />
+                {plan && (
+                  <Suspense
+                    fallback={
+                      <p role="status" className="card text-ink-soft">
+                        Loading ideas…
+                      </p>
+                    }
+                  >
+                    <IdeasPanel plan={plan} />
+                  </Suspense>
+                )}
+              </div>
+            )}
+            {tab === 'budget' && (plan ? <BudgetTab plan={plan} dispatch={dispatch} /> : needPlan)}
+            {tab === 'timeline' &&
+              (plan ? <TimelineTab plan={plan} today={today} dispatch={dispatch} /> : needPlan)}
+            {tab === 'vendors' &&
+              (plan ? (
                 <Suspense
                   fallback={
                     <p role="status" className="card text-ink-soft">
-                      Loading ideas…
+                      Loading vendors…
                     </p>
                   }
                 >
-                  <IdeasPanel plan={plan} />
+                  <VendorsTab plan={plan} dispatch={dispatch} />
                 </Suspense>
-              )}
-            </div>
-          )}
-          {tab === 'budget' && (plan ? <BudgetTab plan={plan} dispatch={dispatch} /> : needPlan)}
-          {tab === 'timeline' &&
-            (plan ? <TimelineTab plan={plan} today={today} dispatch={dispatch} /> : needPlan)}
-          {tab === 'vendors' &&
-            (plan ? (
-              <Suspense
-                fallback={
-                  <p role="status" className="card text-ink-soft">
-                    Loading vendors…
-                  </p>
-                }
-              >
-                <VendorsTab plan={plan} dispatch={dispatch} />
-              </Suspense>
-            ) : (
-              needPlan
-            ))}
-        </div>
-      </main>
+              ) : (
+                needPlan
+              ))}
+          </div>
+        </main>
 
-      {plan && (
-        <ProgressPanel
-          plan={plan}
-          open={progressOpen}
-          onToggle={() => setProgressOpen((v) => !v)}
-          onNavigate={(next) => {
-            setTab(next);
-            setProgressOpen(false);
-          }}
+        {plan && (
+          <ProgressPanel
+            plan={plan}
+            open={progressOpen}
+            onToggle={() => setProgressOpen((v) => !v)}
+            onNavigate={(next) => {
+              setTab(next);
+              setProgressOpen(false);
+            }}
+          />
+        )}
+        {plan && <PrintSummary plan={plan} today={today} />}
+        <Toast
+          toast={state.toast}
+          occasion={plan?.occasion ?? 'wedding'}
+          onDismiss={dismissToast}
         />
-      )}
-      {plan && <PrintSummary plan={plan} today={today} />}
-      <Toast toast={state.toast} occasion={plan?.occasion ?? 'wedding'} onDismiss={dismissToast} />
-    </div>
+      </div>
+    </ErrorBoundary>
   );
 }

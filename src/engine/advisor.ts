@@ -1,5 +1,5 @@
 import { CATEGORIES, type Plan } from '../schemas';
-import { budgetStatus, categoryNeeds, scaleGuests } from './budget';
+import { budgetStatus, categoryNeeds, scaleGuests, type BudgetStatus } from './budget';
 import { vendorChecklist } from './checklist';
 import { diffDays, formatDayMonth } from './dates';
 import { planInsights, type InsightSeverity } from './insights';
@@ -18,6 +18,13 @@ export interface PlanFacts {
   insights: { severity: InsightSeverity; title: string; detail: string }[];
 }
 
+/**
+ * Serializes the plan's current state into grounded numerical facts for the LLM.
+ *
+ * @param plan - Current plan state.
+ * @param today - Current reference ISO date.
+ * @returns Grounded plan facts.
+ */
 export function planFacts(plan: Plan, today: string): PlanFacts {
   return {
     occasion: plan.occasion,
@@ -37,7 +44,7 @@ export function planFacts(plan: Plan, today: string): PlanFacts {
   };
 }
 
-type Topic = 'budget' | 'next' | 'vendors' | 'time' | 'guests' | 'overview';
+export type Topic = 'budget' | 'next' | 'vendors' | 'time' | 'guests' | 'overview';
 
 /** English and Hinglish cues, so "kitna kharcha?" and "what's next?" both land correctly. */
 const TOPICS: [Topic, RegExp][] = [
@@ -48,61 +55,91 @@ const TOPICS: [Topic, RegExp][] = [
   ['guests', /guest|mehman|people|log |headcount|plate/],
 ];
 
+/**
+ * Classifies a user's question into one of six planning topics.
+ *
+ * @param question - Freeform query string.
+ * @returns Detected topic category.
+ */
 export function topicOf(question: string): Topic {
   const q = question.toLowerCase();
   return TOPICS.find(([, pattern]) => pattern.test(q))?.[0] ?? 'overview';
 }
 
+function answerBudget(status: BudgetStatus): string {
+  if (status.overBy > 0) {
+    return `You are over budget by ${formatINR(status.overBy)} (${status.overByPct}%). Open the Budget tab to pick one of the options; nothing is cut automatically.`;
+  }
+  return `You are within your ${formatINR(status.total)} budget: ${formatINR(status.committed)} is backed by accepted quotations and ${formatINR(status.estimated)} is still an estimate.`;
+}
+
+function answerVendors(plan: Plan): string {
+  const items = vendorChecklist(plan);
+  const pending = items.filter((i) => i.status !== 'quote_accepted').map((i) => i.label);
+  if (pending.length === 0) {
+    return 'Every vendor category has an accepted quotation. Well done.';
+  }
+  return `${items.length - pending.length} of ${items.length} vendors are confirmed. Still open: ${pending.join(', ')}. Paste a quotation on the Vendors tab to compare and confirm.`;
+}
+
+function answerNext(plan: Plan, today: string): string {
+  const top = planInsights(plan, today)[0];
+  return top
+    ? `${top.title}. ${top.detail}`
+    : 'Everything is on track. Nothing needs you right now.';
+}
+
+function answerTime(plan: Plan, today: string, days: number): string {
+  let open = 0;
+  try {
+    open = buildSchedule(plan.tasks, plan.eventDate, today).filter(
+      (t) => t.status !== 'done',
+    ).length;
+  } catch {
+    open = plan.tasks.filter((t) => t.status !== 'done').length;
+  }
+  const when = days > 0 ? `${days} days to go` : days === 0 ? 'today' : 'a date that has passed';
+  return `Your ${OCCASION_LABELS[plan.occasion].toLowerCase()} is on ${formatDayMonth(plan.eventDate)}, ${when}, with ${open} tasks still open.`;
+}
+
+function answerGuests(plan: Plan): string {
+  const impact = scaleGuests(plan, plan.guests);
+  return `You are planning for ${plan.guests} guests at about ${formatINR(Math.round(plan.perPlate))} a plate, which needs ${formatINR(impact.requiredCatering)} for catering against ${formatINR(impact.currentCatering)} budgeted.`;
+}
+
+function answerOverview(plan: Plan, today: string, status: BudgetStatus, days: number): string {
+  const confirmed = CATEGORIES.filter((c) =>
+    plan.quotes.some((q) => q.category === c && q.accepted),
+  ).length;
+  const top = planInsights(plan, today)[0];
+  const headline =
+    status.overBy > 0 ? `over budget by ${formatINR(status.overBy)}` : 'within budget';
+  return `${OCCASION_LABELS[plan.occasion]} for ${plan.guests} guests, ${days >= 0 ? `${days} days away` : 'date passed'}, ${headline}, ${confirmed} vendors confirmed.${top ? ` Most important now: ${top.title}.` : ''}`;
+}
+
+const TOPIC_DISPATCH: Record<
+  Topic,
+  (plan: Plan, today: string, status: BudgetStatus, days: number) => string
+> = {
+  budget: (_p, _t, status) => answerBudget(status),
+  vendors: (plan) => answerVendors(plan),
+  next: (plan, today) => answerNext(plan, today),
+  time: (plan, today, _s, days) => answerTime(plan, today, days),
+  guests: (plan) => answerGuests(plan),
+  overview: (plan, today, status, days) => answerOverview(plan, today, status, days),
+};
+
 /**
- * The built-in planner's answer, used when the AI is unavailable. Deterministic and grounded only in
- * the plan, so it is always correct, if less conversational.
+ * Deterministic offline planner answer generator when AI copilot is unavailable.
+ *
+ * @param question - Freeform query string.
+ * @param plan - Current plan state.
+ * @param today - Current reference ISO date.
+ * @returns Grounded response string.
  */
 export function localAnswer(question: string, plan: Plan, today: string): string {
   const status = budgetStatus(plan);
   const days = diffDays(today, plan.eventDate);
-  switch (topicOf(question)) {
-    case 'budget':
-      return status.overBy > 0
-        ? `You are over budget by ${formatINR(status.overBy)} (${status.overByPct}%). Open the Budget tab to pick one of the options; nothing is cut automatically.`
-        : `You are within your ${formatINR(status.total)} budget: ${formatINR(status.committed)} is backed by accepted quotations and ${formatINR(status.estimated)} is still an estimate.`;
-    case 'vendors': {
-      const items = vendorChecklist(plan);
-      const pending = items.filter((i) => i.status !== 'quote_accepted').map((i) => i.label);
-      return pending.length === 0
-        ? 'Every vendor category has an accepted quotation. Well done.'
-        : `${items.length - pending.length} of ${items.length} vendors are confirmed. Still open: ${pending.join(', ')}. Paste a quotation on the Vendors tab to compare and confirm.`;
-    }
-    case 'next': {
-      const top = planInsights(plan, today)[0];
-      return top
-        ? `${top.title}. ${top.detail}`
-        : 'Everything is on track. Nothing needs you right now.';
-    }
-    case 'time': {
-      let open = 0;
-      try {
-        open = buildSchedule(plan.tasks, plan.eventDate, today).filter(
-          (t) => t.status !== 'done',
-        ).length;
-      } catch {
-        open = plan.tasks.filter((t) => t.status !== 'done').length;
-      }
-      const when =
-        days > 0 ? `${days} days to go` : days === 0 ? 'today' : 'a date that has passed';
-      return `Your ${OCCASION_LABELS[plan.occasion].toLowerCase()} is on ${formatDayMonth(plan.eventDate)}, ${when}, with ${open} tasks still open.`;
-    }
-    case 'guests': {
-      const impact = scaleGuests(plan, plan.guests);
-      return `You are planning for ${plan.guests} guests at about ${formatINR(Math.round(plan.perPlate))} a plate, which needs ${formatINR(impact.requiredCatering)} for catering against ${formatINR(impact.currentCatering)} budgeted.`;
-    }
-    case 'overview': {
-      const confirmed = CATEGORIES.filter((c) =>
-        plan.quotes.some((q) => q.category === c && q.accepted),
-      ).length;
-      const top = planInsights(plan, today)[0];
-      const headline =
-        status.overBy > 0 ? `over budget by ${formatINR(status.overBy)}` : 'within budget';
-      return `${OCCASION_LABELS[plan.occasion]} for ${plan.guests} guests, ${days >= 0 ? `${days} days away` : 'date passed'}, ${headline}, ${confirmed} vendors confirmed.${top ? ` Most important now: ${top.title}.` : ''}`;
-    }
-  }
+  const topic = topicOf(question);
+  return TOPIC_DISPATCH[topic](plan, today, status, days);
 }

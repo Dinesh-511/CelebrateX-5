@@ -2,6 +2,9 @@ import { MAX_QUOTES_PER_CATEGORY, type Category, type Plan, type Quote } from '.
 import { categoryLabel } from './presets';
 import { formatINR } from './money';
 
+/** Maximum conventional advance percentage requested before triggering a warning flag. */
+export const MAX_TYPICAL_ADVANCE_PCT = 50;
+
 /** Total the vendor would charge for `guests`, or null when the quote has no usable price. */
 export function effectiveCost(quote: Quote, guests: number): number | null {
   if (quote.totalPrice != null) return quote.totalPrice;
@@ -26,6 +29,13 @@ export interface QuoteFlag {
   amount?: number;
 }
 
+/**
+ * Compares an extracted quotation against the plan's allocation, guest count, and risk parameters.
+ *
+ * @param quote - The vendor quotation to inspect.
+ * @param plan - Current plan details.
+ * @returns Array of risk or mismatch flags.
+ */
 export function compareQuote(quote: Quote, plan: Plan): QuoteFlag[] {
   const flags: QuoteFlag[] = [];
   if (quote.guestMinimum != null && quote.guestMinimum > plan.guests) {
@@ -52,7 +62,7 @@ export function compareQuote(quote: Quote, plan: Plan): QuoteFlag[] {
       message: 'GST/tax is not mentioned; ask whether it is included.',
     });
   }
-  if (quote.advancePercent != null && quote.advancePercent > 50) {
+  if (quote.advancePercent != null && quote.advancePercent > MAX_TYPICAL_ADVANCE_PCT) {
     flags.push({
       code: 'advanceHigh',
       message: `${quote.advancePercent}% advance is high; 25-50% is more usual.`,
@@ -78,6 +88,12 @@ export interface MissingField {
   question: string;
 }
 
+/**
+ * Identifies crucial quote details that were omitted from vendor documentation.
+ *
+ * @param quote - Parsed quote object.
+ * @returns List of missing fields and polite clarifying questions.
+ */
 export function missingFields(quote: Quote): MissingField[] {
   const out: MissingField[] = [];
   if (quote.totalPrice == null && quote.pricePerPlate == null) {
@@ -113,7 +129,13 @@ export function missingFields(quote: Quote): MissingField[] {
   return out;
 }
 
-/** Polite, ready-to-send message asking only for what the quote is missing. */
+/**
+ * Generates a polite, copy-ready clarification message to send to the vendor.
+ *
+ * @param quote - Target quotation.
+ * @param plan - Current plan details.
+ * @returns Ready-to-send draft message.
+ */
 export function inquiryDraft(quote: Quote, plan: Plan): string {
   const label = categoryLabel(plan.occasion, quote.category).toLowerCase();
   const greeting = quote.vendorName ? `Namaste ${quote.vendorName},` : 'Namaste,';
@@ -126,7 +148,14 @@ export function inquiryDraft(quote: Quote, plan: Plan): string {
   return `${greeting}\n\n${intro} Before we decide, could you please confirm:\n${list}\n\nThank you, we look forward to hearing from you.`;
 }
 
-/** Adds a quote unless the category already holds the maximum number of comparisons. */
+/**
+ * Adds a quote to the plan unless the category already reached comparison limit.
+ *
+ * @param plan - Current plan.
+ * @param quote - Quote payload to store.
+ * @param id - Unique quote ID.
+ * @returns Updated plan and whether quote was added.
+ */
 export function addQuote(plan: Plan, quote: Quote, id: string): { plan: Plan; added: boolean } {
   const count = plan.quotes.filter((q) => q.category === quote.category).length;
   if (count >= MAX_QUOTES_PER_CATEGORY) return { plan, added: false };
@@ -139,7 +168,13 @@ export function addQuote(plan: Plan, quote: Quote, id: string): { plan: Plan; ad
   };
 }
 
-/** Accepting a quote makes it the single verified quotation for its category. */
+/**
+ * Accepting a quote makes it the single verified quotation for its category.
+ *
+ * @param plan - Current plan.
+ * @param id - Quote ID to accept.
+ * @returns Updated plan with designated quotation accepted.
+ */
 export function acceptQuote(plan: Plan, id: string): Plan {
   const target = plan.quotes.find((q) => q.id === id);
   if (!target) return plan;
@@ -151,10 +186,24 @@ export function acceptQuote(plan: Plan, id: string): Plan {
   };
 }
 
+/**
+ * Removes a saved quote from the plan.
+ *
+ * @param plan - Current plan.
+ * @param id - Quote ID to remove.
+ * @returns Updated plan without the specified quote.
+ */
 export function removeQuote(plan: Plan, id: string): Plan {
   return { ...plan, quotes: plan.quotes.filter((q) => q.id !== id) };
 }
 
+/**
+ * Marks all quotes in the specified category as unaccepted.
+ *
+ * @param plan - Current plan.
+ * @param category - Target budget category.
+ * @returns Updated plan with category unverified.
+ */
 export function unacceptCategory(plan: Plan, category: Category): Plan {
   return {
     ...plan,

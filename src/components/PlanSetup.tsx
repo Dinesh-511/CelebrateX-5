@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from 'react';
+import { useState, type FormEvent, type ReactElement } from 'react';
 import {
   createPlan,
   formatINR,
@@ -21,6 +21,7 @@ import {
 import { DescribeEvent } from './DescribeEvent';
 import { ErrorSummary } from './ErrorSummary';
 import { PlanExtras } from './PlanExtras';
+import { PlanSetupHero } from './PlanSetupHero';
 import { Field } from './ui';
 
 interface Errors {
@@ -29,15 +30,17 @@ interface Errors {
   date?: string;
 }
 
-export function PlanSetup({
-  today,
-  existing,
-  onCreate,
-}: {
+export interface PlanSetupProps {
   today: string;
   existing: Plan | null;
   onCreate: (plan: Plan) => void;
-}) {
+}
+
+/**
+ * Plan creation and configuration form: AI event description parser,
+ * occasion picker, essentials input, and preference settings.
+ */
+export function PlanSetup({ today, existing, onCreate }: PlanSetupProps): ReactElement {
   const [occasion, setOccasion] = useState<Occasion>(existing?.occasion ?? 'wedding');
   const [budgetText, setBudgetText] = useState(existing ? String(existing.totalBudget) : '');
   const [guestsText, setGuestsText] = useState(existing ? String(existing.guests) : '');
@@ -88,7 +91,7 @@ export function PlanSetup({
     return found;
   }
 
-  function submit(event: FormEvent) {
+  function submit(event: FormEvent): void {
     event.preventDefault();
     const next: Errors = {};
     const guests = parseGuests(guestsText);
@@ -122,20 +125,7 @@ export function PlanSetup({
 
   return (
     <div className="grid gap-6 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] lg:items-start">
-      {!existing && (
-        <div className="lg:col-span-2 card bg-gradient-to-br from-card via-card to-accent-soft/30 p-6 sm:p-8 shadow-soft">
-          <span className="badge-estimate text-[11px] font-bold uppercase tracking-wider text-accent border-accent/20 bg-accent-soft mb-3 inline-flex">
-            Celebration Architecture
-          </span>
-          <h2 className="text-2xl sm:text-4xl font-extrabold tracking-tight text-ink leading-tight">
-            Plan the celebration, not the spreadsheet.
-          </h2>
-          <p className="mt-2.5 max-w-2xl text-xs sm:text-sm text-ink-soft leading-relaxed">
-            Tell us about your event. CelebrateX keeps your budget, timeline and vendors in one
-            connected plan, so a change in one place updates everything else.
-          </p>
-        </div>
-      )}
+      {!existing && <PlanSetupHero />}
       <DescribeEvent onParsed={applyParsed} />
 
       <form

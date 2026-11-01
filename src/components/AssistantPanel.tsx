@@ -166,7 +166,7 @@ export function AssistantPanel({
         </button>
       )}
 
-      <div aria-live="polite" className="mt-3">
+      <div aria-live="polite" aria-busy={ai.state.status === 'loading'} className="mt-3">
         {ai.state.status === 'loading' && (
           <AiLoading label="Gemini is reviewing your plan…" progress={ai.progress} />
         )}

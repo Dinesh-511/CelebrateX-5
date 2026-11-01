@@ -15,10 +15,21 @@ describe('accessibility (axe)', () => {
       '#main',
     );
     expect(screen.getByRole('banner')).toBeInTheDocument();
-    expect(screen.getByRole('main')).toBeInTheDocument();
+    const main = screen.getByRole('main');
+    expect(main).toBeInTheDocument();
+    expect(main).toHaveAttribute('tabIndex', '-1');
     expect(screen.getByRole('tablist')).toBeInTheDocument();
     expect(screen.getAllByRole('tab')).toHaveLength(4);
     expect(document.documentElement.lang).not.toBe('fr');
+  });
+
+  it('closes progress drawer on Escape key press', async () => {
+    const { user } = renderWithPlan();
+    const progressBtn = screen.getByRole('button', { name: /Progress \d+%/i });
+    await user.click(progressBtn);
+    expect(progressBtn).toHaveAttribute('aria-expanded', 'true');
+    await user.keyboard('{Escape}');
+    expect(progressBtn).toHaveAttribute('aria-expanded', 'false');
   });
 
   it('keyboard arrows move between tabs', async () => {

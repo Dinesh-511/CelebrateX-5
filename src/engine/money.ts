@@ -1,12 +1,27 @@
 const inr = new Intl.NumberFormat('en-IN', { maximumFractionDigits: 0 });
 
-/** ₹8,00,000 (en-IN grouping). Negative values render as −₹x. */
+export const MAX_REASONABLE_BUDGET_RUPEES = 100_000_000_000;
+export const LAKH_FACTOR = 100_000;
+export const CRORE_FACTOR = 10_000_000;
+
+/**
+ * Formats a rupee amount with Indian numbering grouping (e.g. ₹8,00,000).
+ *
+ * @param amount - Numeric amount in rupees.
+ * @returns Formatted currency string.
+ */
 export function formatINR(amount: number): string {
   const n = Math.round(amount);
   return `${n < 0 ? '−' : ''}₹${inr.format(Math.abs(n))}`;
 }
 
-/** Share of `total` as a percentage rounded to one decimal; 0 when the total is 0. */
+/**
+ * Calculates what percentage of `total` is `part`, rounded to one decimal place.
+ *
+ * @param part - The numerator value.
+ * @param total - The total denominator.
+ * @returns Rounded percentage float.
+ */
 export function percentOf(part: number, total: number): number {
   return total > 0 ? Math.round((part / total) * 1000) / 10 : 0;
 }
@@ -15,13 +30,18 @@ function trim(n: number): string {
   return String(Math.round(n * 100) / 100);
 }
 
-/** Compact friendly form: ₹8 lakh, ₹8.5 lakh, ₹2 crore; below one lakh uses full grouping. */
+/**
+ * Compact Indian currency representation: ₹8 lakh, ₹8.5 lakh, ₹2 crore.
+ *
+ * @param amount - Numeric amount in rupees.
+ * @returns Human-friendly formatted string.
+ */
 export function toLakh(amount: number): string {
   const n = Math.round(amount);
   const abs = Math.abs(n);
   const sign = n < 0 ? '−' : '';
-  if (abs >= 10_000_000) return `${sign}₹${trim(abs / 10_000_000)} crore`;
-  if (abs >= 100_000) return `${sign}₹${trim(abs / 100_000)} lakh`;
+  if (abs >= CRORE_FACTOR) return `${sign}₹${trim(abs / CRORE_FACTOR)} crore`;
+  if (abs >= LAKH_FACTOR) return `${sign}₹${trim(abs / LAKH_FACTOR)} lakh`;
   return formatINR(n);
 }
 
@@ -32,8 +52,12 @@ export interface Share<T> {
 
 /**
  * Splits `total` (integer rupees) across `items` in proportion to `weightOf`, so the shares always
- * sum exactly to `total`. Largest-remainder method; ties go to the earlier item. Missing, negative
- * or non-finite weights count as zero, and all-zero weights split evenly.
+ * sum exactly to `total`. Largest-remainder method (Hamilton-Hare); ties go to earlier items.
+ *
+ * @param items - Array of items to apportion across.
+ * @param weightOf - Weight extraction function.
+ * @param total - Target integer total.
+ * @returns Array of item shares summing to total.
  */
 export function apportion<T>(
   items: readonly T[],
@@ -66,21 +90,27 @@ export function apportion<T>(
   }));
 }
 
-/** `apportion` for a plain list of weights. */
+/**
+ * Largest-remainder rounding helper for an array of numeric weights.
+ *
+ * @param weights - Target weights.
+ * @param total - Desired total sum.
+ * @returns Array of integer rounded shares.
+ */
 export function largestRemainderRound(weights: readonly number[], total: number): number[] {
   return apportion(weights, (weight) => weight, total).map((part) => part.share);
 }
 
 const UNIT: Record<string, number> = {
   '': 1,
-  l: 100_000,
-  lac: 100_000,
-  lacs: 100_000,
-  lakh: 100_000,
-  lakhs: 100_000,
-  cr: 10_000_000,
-  crore: 10_000_000,
-  crores: 10_000_000,
+  l: LAKH_FACTOR,
+  lac: LAKH_FACTOR,
+  lacs: LAKH_FACTOR,
+  lakh: LAKH_FACTOR,
+  lakhs: LAKH_FACTOR,
+  cr: CRORE_FACTOR,
+  crore: CRORE_FACTOR,
+  crores: CRORE_FACTOR,
   k: 1_000,
   thousand: 1_000,
 };
@@ -88,6 +118,9 @@ const UNIT: Record<string, number> = {
 /**
  * Forgiving rupee parser: "8 lakh", "8L", "8,00,000", "₹800000", "8.5 lac", "2 crore", "45k".
  * Returns integer rupees, or null when the text is not a positive amount.
+ *
+ * @param input - Natural user input string.
+ * @returns Integer rupee amount or null if invalid.
  */
 export function parseINR(input: string): number | null {
   if (typeof input !== 'string') return null;
@@ -101,7 +134,8 @@ export function parseINR(input: string): number | null {
     text,
   );
   if (!match) return null;
-  const value = Number(match[1]) * (UNIT[match[2] ?? ''] ?? 1);
-  if (!Number.isFinite(value) || value <= 0 || value > 100_000_000_000) return null;
+  const unitMultiplier = match[2] ? (UNIT[match[2]] ?? 1) : 1;
+  const value = Number(match[1]) * unitMultiplier;
+  if (!Number.isFinite(value) || value <= 0 || value > MAX_REASONABLE_BUDGET_RUPEES) return null;
   return Math.round(value);
 }

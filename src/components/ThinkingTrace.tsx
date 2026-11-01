@@ -48,6 +48,8 @@ export function LiveThinking({ label, progress }: { label: string; progress: AiP
   return (
     <div
       role="status"
+      aria-live="polite"
+      aria-busy="true"
       className="rounded-2xl border border-accent/30 bg-accent-soft p-4 sm:p-5 shadow-soft"
       data-testid="ai-loading"
     >

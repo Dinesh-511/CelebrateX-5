@@ -5,6 +5,7 @@ import {
   RATE_LIMIT_MAX,
   RATE_LIMIT_WINDOW_MS,
   resetRateLimit,
+  safeJsonReviver,
   sameOrigin,
 } from '../../api/_lib/http';
 import parseIntake from '../../api/parse-intake';
@@ -58,5 +59,14 @@ describe('body size guard', () => {
     const { res, out } = mockRes();
     await parseIntake(mockReq({ body: undefined }), res);
     expect(out.status).toBe(400);
+  });
+  it('blocks prototype pollution in request bodies', async () => {
+    const { res, out } = mockRes();
+    await parseIntake(mockReq({ body: '{"__proto__":{"polluted":true}}' }), res);
+    expect(out.status).toBe(400);
+    expect(() => safeJsonReviver('__proto__', 1)).toThrow(/Prototype pollution/);
+    expect(() => safeJsonReviver('constructor', 1)).toThrow(/Prototype pollution/);
+    expect(() => safeJsonReviver('prototype', 1)).toThrow(/Prototype pollution/);
+    expect(safeJsonReviver('valid', 42)).toBe(42);
   });
 });

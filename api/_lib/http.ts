@@ -1,41 +1,13 @@
-import type { ZodType } from 'zod';
-import type { AiStreamEvent } from '../../src/schemas/index.js';
+import type { ApiRequest, ApiResponse, ErrorCode, HandlerConfig } from './types.js';
 import { CACHE_TTL_MS, cacheGet, cacheKey, cacheSet } from './cache.js';
-import { incrementWindow, storeGet, storeKey, storeSet } from './store.js';
+import { isRateLimited, clientIp } from './rate-limit.js';
+import { storeGet, storeKey, storeSet } from './store.js';
 
-/** Structural subsets of the Vercel request/response so handlers are trivial to unit test. */
-export interface ApiRequest {
-  method?: string;
-  headers: Record<string, string | string[] | undefined>;
-  body?: unknown;
-  socket?: { remoteAddress?: string };
-}
-export interface ApiResponse {
-  status(code: number): ApiResponse;
-  json(body: unknown): void;
-  setHeader(name: string, value: string): void;
-  /** Present on real (Node) responses; used to stream thought summaries as NDJSON. */
-  write?(chunk: string): unknown;
-  end?(): unknown;
-}
+export * from './types.js';
+export * from './rate-limit.js';
 
 export const NDJSON = 'application/x-ndjson';
-
 export const MAX_BODY_BYTES = 8 * 1024;
-export const RATE_LIMIT_MAX = 20;
-export const RATE_LIMIT_WINDOW_MS = 5 * 60 * 1000;
-
-export type ErrorCode =
-  | 'METHOD_NOT_ALLOWED'
-  | 'FORBIDDEN_ORIGIN'
-  | 'UNSUPPORTED_MEDIA_TYPE'
-  | 'PAYLOAD_TOO_LARGE'
-  | 'INVALID_INPUT'
-  | 'RATE_LIMITED'
-  | 'AI_RESPONSE_INVALID'
-  | 'AI_TIMEOUT'
-  | 'AI_UNAVAILABLE'
-  | 'INTERNAL';
 
 export class ApiFailure extends Error {
   readonly status: number;
@@ -47,52 +19,20 @@ export class ApiFailure extends Error {
   }
 }
 
+/**
+ * Safe reviver for JSON.parse that prevents prototype pollution by rejecting
+ * __proto__, constructor, and prototype property keys.
+ */
+export function safeJsonReviver(key: string, value: unknown): unknown {
+  if (key === '__proto__' || key === 'constructor' || key === 'prototype') {
+    throw new Error(`Prototype pollution attempt detected: ${key}`);
+  }
+  return value;
+}
+
 function header(req: ApiRequest, name: string): string {
   const value = req.headers[name];
   return (Array.isArray(value) ? value[0] : value) ?? '';
-}
-
-/** Best-effort client address, used only as a rate-limit key. */
-export function clientIp(req: ApiRequest): string {
-  // Vercel sets these itself; prefer them over a header a caller could add.
-  const platform = header(req, 'x-vercel-forwarded-for') || header(req, 'x-real-ip');
-  const forwarded = header(req, 'x-forwarded-for').split(',')[0]?.trim();
-  if (platform) return platform;
-  if (forwarded) return forwarded;
-  return req.socket?.remoteAddress ?? 'unknown';
-}
-
-const hits = new Map<string, number[]>();
-
-/** Per-instance sliding-window limiter, used when no shared store is configured. */
-export function rateLimited(ip: string, now: number = Date.now()): boolean {
-  const recent = (hits.get(ip) ?? []).filter((t) => now - t < RATE_LIMIT_WINDOW_MS);
-  if (recent.length >= RATE_LIMIT_MAX) {
-    hits.set(ip, recent);
-    return true;
-  }
-  recent.push(now);
-  hits.set(ip, recent);
-  if (hits.size > 5000) {
-    for (const [key, times] of hits) {
-      if (times.every((t) => now - t >= RATE_LIMIT_WINDOW_MS)) hits.delete(key);
-    }
-  }
-  return false;
-}
-
-export function resetRateLimit(): void {
-  hits.clear();
-}
-
-/** Shared fixed-window limit across all instances when a store is configured, else in memory. */
-export async function isRateLimited(ip: string, now: number = Date.now()): Promise<boolean> {
-  const window = Math.floor(now / RATE_LIMIT_WINDOW_MS);
-  const count = await incrementWindow(
-    storeKey('rl', `${ip}:${window}`),
-    RATE_LIMIT_WINDOW_MS / 1000,
-  );
-  return count === null ? rateLimited(ip, now) : count > RATE_LIMIT_MAX;
 }
 
 /** Validated AI results: shared store first (if configured), then this instance's memory. */
@@ -112,7 +52,6 @@ async function writeCache(key: string, value: unknown): Promise<void> {
 function bodyBytes(body: unknown): number {
   if (typeof body === 'string') return Buffer.byteLength(body);
   try {
-    // JSON.stringify returns undefined for undefined input, despite its declared type.
     const stringify: (value: unknown) => string | undefined = JSON.stringify;
     return Buffer.byteLength(stringify(body) ?? '');
   } catch {
@@ -123,7 +62,7 @@ function bodyBytes(body: unknown): number {
 /**
  * Only our own pages may spend the AI quota. Browsers always send Origin on a POST; it must match
  * the host serving the API. Cross-site requests and clients that hide where they come from are
- * refused. (A determined server-side caller can still forge headers, which the rate limit covers.)
+ * refused.
  */
 export function sameOrigin(req: ApiRequest): boolean {
   const origin = header(req, 'origin');
@@ -134,14 +73,6 @@ export function sameOrigin(req: ApiRequest): boolean {
   } catch {
     return false;
   }
-}
-
-export interface HandlerConfig<I> {
-  /** Route name, used as the cache namespace. */
-  name: string;
-  input: ZodType<I>;
-  /** Returns data that has already been validated against the endpoint's output schema. */
-  run: (input: I, onEvent?: (event: AiStreamEvent) => void) => Promise<unknown>;
 }
 
 function fail(res: ApiResponse, status: number, code: ErrorCode): void {
@@ -156,7 +87,7 @@ function failureCode(error: unknown): ErrorCode {
 
 /**
  * Streams one AI call as NDJSON: thought summaries and model switches as they happen, then exactly
- * one `result` (already validated) or `error` line. Headers go out first, so failures are lines too.
+ * one `result` (already validated) or `error` line.
  */
 async function streamRun<I>(
   res: ApiResponse,
@@ -182,6 +113,9 @@ async function streamRun<I>(
 export function createHandler<I>(config: HandlerConfig<I>) {
   return async function handler(req: ApiRequest, res: ApiResponse): Promise<void> {
     res.setHeader('Cache-Control', 'no-store');
+    res.setHeader('X-Content-Type-Options', 'nosniff');
+    res.setHeader('X-Frame-Options', 'DENY');
+
     if (req.method !== 'POST') {
       res.setHeader('Allow', 'POST');
       fail(res, 405, 'METHOD_NOT_ALLOWED');
@@ -196,7 +130,7 @@ export function createHandler<I>(config: HandlerConfig<I>) {
       return;
     }
     if (await isRateLimited(clientIp(req))) {
-      res.setHeader('Retry-After', String(RATE_LIMIT_WINDOW_MS / 1000));
+      res.setHeader('Retry-After', '300');
       fail(res, 429, 'RATE_LIMITED');
       return;
     }
@@ -211,7 +145,7 @@ export function createHandler<I>(config: HandlerConfig<I>) {
     let body: unknown = req.body;
     if (typeof body === 'string') {
       try {
-        body = JSON.parse(body);
+        body = JSON.parse(body, safeJsonReviver);
       } catch {
         fail(res, 400, 'INVALID_INPUT');
         return;

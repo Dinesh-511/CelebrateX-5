@@ -99,7 +99,7 @@ export function AskPlanner({ plan, today }: { plan: Plan; today: string }) {
       </div>
 
       {busy && (
-        <div className="mt-3">
+        <div className="mt-3" aria-live="polite" aria-busy="true">
           <AiLoading label="Gemini is thinking about your plan…" progress={ai.progress} />
         </div>
       )}

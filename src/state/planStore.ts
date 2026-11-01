@@ -6,6 +6,7 @@ import {
   formatINR,
   redistribute,
   removeQuote,
+  safeJsonReviver,
   setTotalBudget,
   toggleContacted,
   type BudgetChange,
@@ -173,7 +174,7 @@ export function loadInitial(hash: string, storage: Pick<Storage, 'getItem'> | nu
 function loadStored(storage: Pick<Storage, 'getItem'> | null): Plan | null {
   try {
     const raw = storage?.getItem(STORAGE_KEY);
-    return raw ? parsePlan(JSON.parse(raw)) : null;
+    return raw ? parsePlan(JSON.parse(raw, safeJsonReviver)) : null;
   } catch {
     return null;
   }

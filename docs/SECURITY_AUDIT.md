@@ -30,10 +30,11 @@ CelebrateX is built with a zero-trust, defense-in-depth security model. This doc
 - **Data in Transit**: All communication is strictly HTTPS.
 - **Shared Link Verification**: Plans encoded in URLs use URL-safe LZ-compression with base64url validation, strict schema checks, and DAG cycle detection before hydration.
 
-### A03: Injection (XSS & Prompt Injection)
+### A03: Injection (XSS, Prompt Injection & Prototype Pollution)
 
 - **Cross-Site Scripting (XSS)**: Prohibited from using `dangerouslySetInnerHTML`, `.innerHTML`, `eval`, or `new Function`. Validated automatically via AST regex tests in `tests/quality/hygiene.test.ts`.
-- **Prompt Injection**: User input is quarantined within typed structured payloads and never interpolated directly into operational system instructions. System prompts enforce strict JSON mode with zod runtime validation upon response extraction.
+- **Prototype Pollution Defense**: All JSON parsing of untrusted inputs (hash decoding in `src/state/share.ts`, local storage hydration in `src/state/planStore.ts`, and POST request bodies in `api/_lib/http.ts`) enforces `safeJsonReviver`. Keys `__proto__`, `constructor`, and `prototype` are detected and rejected with an explicit error, verified in `tests/engine/compression.test.ts` and `tests/api/http-edge.test.ts`.
+- **Prompt Injection Delimiters & Control Character Sanitization**: User inputs are stripped of non-printable control characters via `sanitizePromptText` and encapsulated within strict structured XML tags (`<user_text>` and `<user_input>`). System prompt instructions explicitly state that tagged content is untrusted data to analyze, never operational directives. Response payloads must strictly validate against Zod schemas.
 
 ### A04: Insecure Design
 

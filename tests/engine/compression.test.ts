@@ -4,6 +4,8 @@ import {
   buildSchedule,
   compressTasks,
   RUN_SHEETS,
+  safeJsonParse,
+  safeJsonReviver,
   scheduleCompression,
   TASK_TEMPLATES,
 } from '../../src/engine';
@@ -76,5 +78,38 @@ describe('RUN_SHEETS', () => {
       expect((sheet[i - 1]?.time ?? '') < (sheet[i]?.time ?? '')).toBe(true);
     }
     expect(sheet.every((item) => /^\d{2}:\d{2}$/.test(item.time))).toBe(true);
+  });
+});
+
+describe('prototype pollution defense', () => {
+  it('parses valid JSON without issues', () => {
+    const data = safeJsonParse('{"name":"CelebrateX","budget":500000}') as {
+      name: string;
+      budget: number;
+    };
+    expect(data.name).toBe('CelebrateX');
+    expect(data.budget).toBe(500000);
+  });
+
+  it('rejects __proto__ pollution keys', () => {
+    expect(() => safeJsonParse('{"__proto__":{"polluted":true}}')).toThrow(
+      /Prototype pollution attempt/,
+    );
+  });
+
+  it('rejects constructor pollution keys', () => {
+    expect(() => safeJsonParse('{"constructor":{"prototype":{"polluted":true}}}')).toThrow(
+      /Prototype pollution attempt/,
+    );
+  });
+
+  it('rejects prototype pollution keys', () => {
+    expect(() => safeJsonParse('{"prototype":{"polluted":true}}')).toThrow(
+      /Prototype pollution attempt/,
+    );
+  });
+
+  it('safeJsonReviver passes legitimate keys unchanged', () => {
+    expect(safeJsonReviver('validKey', 123)).toBe(123);
   });
 });

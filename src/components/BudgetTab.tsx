@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useRef } from 'react';
+import { useCallback, useMemo, useRef, type ReactElement } from 'react';
 import { useSyncedText } from '../lib/useSyncedText';
 import {
   budgetStatus,
@@ -14,12 +14,21 @@ import { MAX_GUESTS, type Category, type Plan } from '../schemas';
 import type { Action } from '../state/planStore';
 import { AllocationBar, SWATCH_CLASS } from './AllocationBar';
 import { BudgetCards } from './BudgetCards';
+import { BudgetStatusBanner } from './BudgetStatusBanner';
 import { CategoryRow } from './CategoryRow';
 import { Icon } from './Icon';
 import { TradeoffPanel } from './TradeoffPanel';
 import { Field } from './ui';
 
-export function BudgetTab({ plan, dispatch }: { plan: Plan; dispatch: (action: Action) => void }) {
+export interface BudgetTabProps {
+  plan: Plan;
+  dispatch: (action: Action) => void;
+}
+
+/**
+ * Budget tab view: connected distribution sliders, card summary, guest impact, and tradeoff options.
+ */
+export function BudgetTab({ plan, dispatch }: BudgetTabProps): ReactElement {
   const status = useMemo(() => budgetStatus(plan), [plan]);
   const needs = useMemo(() => categoryNeeds(plan), [plan]);
   const options = useMemo(() => generateOverBudgetOptions(plan), [plan]);
@@ -38,17 +47,19 @@ export function BudgetTab({ plan, dispatch }: { plan: Plan; dispatch: (action: A
     [dispatch],
   );
 
-  function commitGuests(value: string) {
+  function commitGuests(value: string): void {
     const guests = parseGuests(value);
     if (guests === null) setGuestsText(String(plan.guests));
     else dispatch({ type: 'setGuests', guests });
   }
-  function commitBudget() {
+
+  function commitBudget(): void {
     const parsed = parseINR(budgetText);
     if (parsed === null) setBudgetText(String(plan.totalBudget));
     else dispatch({ type: 'setTotal', total: parsed });
   }
-  function commitPerPlate() {
+
+  function commitPerPlate(): void {
     const parsed = perPlateText.trim() === '0' ? 0 : parseINR(perPlateText);
     if (parsed === null) setPerPlateText(String(Math.round(plan.perPlate)));
     else dispatch({ type: 'setPerPlate', perPlate: parsed });
@@ -56,7 +67,7 @@ export function BudgetTab({ plan, dispatch }: { plan: Plan; dispatch: (action: A
 
   const over = status.overBy > 0;
   const optionsRef = useRef<HTMLDivElement>(null);
-  const showOptions = () => {
+  const showOptions = (): void => {
     optionsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     optionsRef.current?.focus({ preventScroll: true });
   };
@@ -81,44 +92,7 @@ export function BudgetTab({ plan, dispatch }: { plan: Plan; dispatch: (action: A
         </div>
       </section>
 
-      <div
-        role="status"
-        aria-live="polite"
-        data-testid="over-budget-region"
-        className="sticky top-16 z-20"
-      >
-        {over ? (
-          <div className="flex h-[4.5rem] items-center gap-3.5 rounded-2xl border border-warn/50 bg-warn-soft px-5 text-warn shadow-card backdrop-blur-md">
-            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-warn text-paper shadow-2xs">
-              <Icon name="alert" className="h-5 w-5" />
-            </div>
-            <div className="min-w-0 flex-1">
-              <p className="truncate text-sm sm:text-base font-bold">
-                Over budget by {formatINR(status.overBy)}
-              </p>
-              <p className="truncate text-xs sm:text-sm text-warn/90">
-                {status.overByPct}% of your total. Nothing was changed automatically.
-              </p>
-            </div>
-            <button
-              type="button"
-              className="btn-secondary shrink-0 text-xs sm:text-sm"
-              onClick={showOptions}
-            >
-              Options
-            </button>
-          </div>
-        ) : (
-          <div className="flex h-[4.5rem] items-center gap-3.5 rounded-2xl border border-line bg-card/95 px-5 text-ink-soft shadow-card backdrop-blur-md">
-            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-ok-soft text-ok border border-ok/20">
-              <Icon name="check" className="h-4 w-4" />
-            </div>
-            <p className="truncate text-sm font-semibold text-ink">
-              Within budget. Everything adds up to {formatINR(status.total)}.
-            </p>
-          </div>
-        )}
-      </div>
+      <BudgetStatusBanner status={status} onShowOptions={showOptions} />
 
       <section aria-labelledby="cats-h">
         <div className="mb-4">

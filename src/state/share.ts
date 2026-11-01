@@ -1,3 +1,4 @@
+import { safeJsonReviver } from '../engine';
 import type { Plan } from '../schemas';
 import { parsePlan } from './validate';
 
@@ -37,7 +38,7 @@ export function decodePlan(encoded: string): DecodeResult {
   if (!/^[A-Za-z0-9_-]+$/.test(encoded)) return { ok: false, reason: 'malformed' };
   let data: unknown;
   try {
-    data = JSON.parse(fromBase64Url(encoded));
+    data = JSON.parse(fromBase64Url(encoded), safeJsonReviver);
   } catch {
     return { ok: false, reason: 'malformed' };
   }
