@@ -27,7 +27,8 @@ const SEVERITY: Record<
   warning: {
     label: 'Needs attention',
     icon: 'clock',
-    badgeClass: 'badge border-amber-500/25 bg-amber-500/10 text-amber-600 dark:text-amber-400',
+    badgeClass:
+      'badge border-amber-500/30 bg-amber-500/10 text-amber-800 dark:text-amber-300 font-medium',
     iconColor: 'text-amber-500',
   },
   suggestion: {
@@ -122,7 +123,7 @@ export function AssistantPanel({
               </span>
               Your planning assistant
             </h2>
-            <span className="hidden sm:inline-flex rounded-full bg-emerald-500/10 px-2 py-0.5 text-[10px] font-semibold text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+            <span className="hidden sm:inline-flex rounded-full bg-emerald-500/10 px-2 py-0.5 text-[10px] font-semibold text-emerald-800 dark:text-emerald-300 border border-emerald-500/30">
               Deterministic Engine Active
             </span>
           </div>

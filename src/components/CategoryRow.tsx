@@ -84,7 +84,7 @@ export const CategoryRow = memo(function CategoryRow({
         </div>
       </div>
 
-      <div className="flex items-center gap-2.5">
+      <div className="flex items-center gap-3.5">
         <input
           type="range"
           aria-label={`${label} amount`}
@@ -94,7 +94,7 @@ export const CategoryRow = memo(function CategoryRow({
           value={amount}
           disabled={locked}
           onChange={(e) => onChange(category, Number(e.target.value))}
-          className="accent-accent"
+          className="w-24 sm:w-32 min-w-[64px] h-7 cursor-pointer accent-accent"
         />
         <button
           type="button"
@@ -108,7 +108,7 @@ export const CategoryRow = memo(function CategoryRow({
           onClick={() => onToggleLock(category)}
         >
           <Icon name={locked ? 'lock' : 'unlock'} className="h-3.5 w-3.5" />
-          <span>{locked ? 'Locked' : 'Lock'}</span>
+          <span>Lock</span>
         </button>
       </div>
 

@@ -69,4 +69,3 @@ export async function isRateLimited(ip: string, now: number = Date.now()): Promi
   );
   return count === null ? rateLimited(ip, now) : count > RATE_LIMIT_MAX;
 }
-

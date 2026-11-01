@@ -37,4 +37,3 @@ export interface HandlerConfig<I> {
   /** Returns data that has already been validated against the endpoint's output schema. */
   run: (input: I, onEvent?: (event: AiStreamEvent) => void) => Promise<unknown>;
 }
-
